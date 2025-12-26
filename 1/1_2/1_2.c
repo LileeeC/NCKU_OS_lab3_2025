@@ -6,7 +6,7 @@
 
 /*Note: Value of LOCK is 0 and value of UNLOCK is 1.*/
 #define LOCK 0
-#define UNLOCK -1
+#define UNLOCK 1
 
 volatile int a = 0;
 volatile int lock = UNLOCK;
@@ -18,7 +18,7 @@ void spin_lock() {
         "mov $0, %%eax\n\t" // 把 0 (LOCK) 放入 eax
         /*YOUR CODE HERE*/
         "xchg %%eax, %[lock]\n\t" //exchange
-        "test %%eax, %%eax\n\t"
+        "dec %%eax\n\t"
         /****************/
         "js loop\n\t" // 結果為負數則跳回 loop 
         :

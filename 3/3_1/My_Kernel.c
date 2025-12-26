@@ -23,7 +23,7 @@ static ssize_t Myread(struct file *fileptr, char __user *ubuf, size_t buffer_len
     // 檢查 offset，如果大於 0 表示已經讀取過，回傳 EOF
     if (*offset > 0) return 0; // EOF
 
-    // 遍歷當前 process (current) 的所有執行緒
+    // 跑過所有thread
     for_each_thread(current, t) {
         if (len >= BUFSIZE) break;
         len += scnprintf(buf + len, BUFSIZE - len,

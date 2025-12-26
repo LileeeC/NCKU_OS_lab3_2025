@@ -4,46 +4,32 @@
 #include <linux/printk.h>
 #include <linux/proc_fs.h>
 #include <asm/current.h>
-#include <linux/uaccess.h>
-#include <linux/sched.h>
 
 #define procfs_name "Mythread_info"
 #define BUFSIZE  1024
 char buf[BUFSIZE]; //kernel buffer
 
-static ssize_t Mywrite(struct file *fileptr, const char __user *ubuf, size_t buffer_len, loff_t *offset){
+static ssize_t Mywrite(struct file *fileptr, const char __user *ubuf, size_t buffer_len, loff_t *offset){ //buffer len is the length of (Thread X says hello!)
     /*Your code here*/
-    size_t to_copy = buffer_len;
+    copy_from_user(buf, ubuf, buffer_len);
 
-    if (to_copy >= BUFSIZE) to_copy = BUFSIZE - 1;
+    sprintf(buf + buffer_len, "PID: %d, TID: %d, time: %lld\n", 
+                    current->tgid, current->pid, current->utime/100/1000);
 
-    if (copy_from_user(buf, ubuf, to_copy))
-        return -EFAULT;
-
-    buf[to_copy] = '\0';
     return buffer_len;
     /****************/
 }
 
 
-static ssize_t Myread(struct file *fileptr, char __user *ubuf, size_t buffer_len, loff_t *offset){
+static ssize_t Myread(struct file *fileptr, char __user *ubuf, size_t buffer_len, loff_t *offset){ //buffer len is the buffer limit user declared
     /*Your code here*/
-    int len = 0;
-    unsigned long ms;
-    char output_buf[BUFSIZE]; // 用來組合最終輸出的字串
+    int len;
+    len = strlen(buf); // actual length of data currently stored in the buffer
 
-    if (*offset > 0) return 0;
-
-    // hint: current->utime/100/1000
-    ms = current->utime / 100 / 1000;
-
-    len = scnprintf(output_buf, BUFSIZE,
-                    "%s\nPID: %d, TID: %d, time: %lu\n",
-                    buf, current->tgid, current->pid, ms);
-
-    if (len > buffer_len) len = buffer_len;
-    if (copy_to_user(ubuf, buf, len)) return -EFAULT; // 將組合好的 output_buf 傳回給 User
-
+    if(*offset > 0){
+        return 0;
+    }
+    copy_to_user(ubuf, buf, len);
     *offset += len;
     return len;
     /****************/

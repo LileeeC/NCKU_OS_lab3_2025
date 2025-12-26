@@ -72,11 +72,11 @@ void *thread1(void *arg){
 #endif
 
     /*YOUR CODE HERE*/
-    /* Hint: Write data into proc file.*/
-    int fd = open("/proc/Mythread_info", O_WRONLY);
-    if (fd >= 0) {
-        write(fd, data, strlen(data));
-        close(fd);
+    // Write data into proc file.
+    FILE *fp = fopen("/proc/Mythread_info", "w"); // Open proc file to invoke kernel proc_write handler
+    if (fp != NULL) {
+        fprintf(fp, "%s\n", data); // Write "Thread 2 says hello!" to kernel
+        fclose(fp);
     }
     /****************/ 
 
@@ -100,11 +100,11 @@ void *thread2(void *arg){
     }
     
     /*YOUR CODE HERE*/
-    /* Hint: Write data into proc file.*/
-    int fd = open("/proc/Mythread_info", O_WRONLY);
-    if (fd >= 0) {
-        write(fd, data, strlen(data));
-        close(fd);
+    // Write data into proc file.
+    FILE *fp = fopen("/proc/Mythread_info", "w"); // Open proc file to invoke kernel proc_write handler
+    if (fp != NULL) {
+        fprintf(fp, "%s\n", data); // Write "Thread 2 says hello!" to kernel
+        fclose(fp);
     }
     /****************/   
 
