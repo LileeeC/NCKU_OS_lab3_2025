@@ -6,7 +6,7 @@
 
 /*Note: Value of LOCK is 0 and value of UNLOCK is 1.*/
 #define LOCK 0
-#define UNLOCK 1
+#define UNLOCK -1
 
 volatile int a = 0;
 volatile int lock = UNLOCK;
@@ -15,12 +15,12 @@ pthread_mutex_t mutex;
 void spin_lock() {
     asm volatile(
         "loop:\n\t"
-        "mov $0, %%eax\n\t"
+        "mov $0, %%eax\n\t" // 把 0 (LOCK) 放入 eax
         /*YOUR CODE HERE*/
-        "xchg %%eax, %[lock]\n\t"
+        "xchg %%eax, %[lock]\n\t" //exchange
         "test %%eax, %%eax\n\t"
         /****************/
-        "js loop\n\t"
+        "js loop\n\t" // 結果為負數則跳回 loop 
         :
         : [lock] "m" (lock)
         : "eax", "memory"

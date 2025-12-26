@@ -30,18 +30,19 @@ static ssize_t Myread(struct file *fileptr, char __user *ubuf, size_t buffer_len
     /*Your code here*/
     int len = 0;
     unsigned long ms;
+    char output_buf[BUFSIZE]; // 用來組合最終輸出的字串
 
     if (*offset > 0) return 0;
 
     // hint: current->utime/100/1000
     ms = current->utime / 100 / 1000;
 
-    len = scnprintf(buf, BUFSIZE,
-                    "String: %s\nProcess ID: %d\nThread ID: %d\nTime(ms): %lu\n",
+    len = scnprintf(output_buf, BUFSIZE,
+                    "%s\nPID: %d, TID: %d, time: %lu\n",
                     buf, current->tgid, current->pid, ms);
 
     if (len > buffer_len) len = buffer_len;
-    if (copy_to_user(ubuf, buf, len)) return -EFAULT;
+    if (copy_to_user(ubuf, buf, len)) return -EFAULT; // 將組合好的 output_buf 傳回給 User
 
     *offset += len;
     return len;

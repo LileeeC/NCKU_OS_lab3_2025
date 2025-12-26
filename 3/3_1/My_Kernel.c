@@ -20,20 +20,20 @@ static ssize_t Myread(struct file *fileptr, char __user *ubuf, size_t buffer_len
     int len = 0;
     struct task_struct *t;
 
+    // 檢查 offset，如果大於 0 表示已經讀取過，回傳 EOF
     if (*offset > 0) return 0; // EOF
 
-    len += scnprintf(buf + len, BUFSIZE - len,
-                     "Process ID: %d\n", current->pid);
-
+    // 遍歷當前 process (current) 的所有執行緒
     for_each_thread(current, t) {
-        len += scnprintf(buf + len, BUFSIZE - len,
-                         "Thread ID: %d, Priority: %d, State: %ld\n",
-                         t->pid, t->prio, t->__state);
         if (len >= BUFSIZE) break;
+        len += scnprintf(buf + len, BUFSIZE - len,
+                        "PID: %d, TID: %d, Priority: %d, State: %ld\n",
+                        t->tgid, t->pid, t->prio, t->__state);
+        
     }
 
-    if (copy_to_user(ubuf, buf, len)) return -EFAULT;
-    *offset += len;
+    if (copy_to_user(ubuf, buf, len)) return -EFAULT; // 將 Kernel buffer 資料複製到 User space
+    *offset += len; // 更新 offset 並回傳長度
     return len;
     /****************/
 }
